@@ -1,60 +1,70 @@
-# hexo-html-prettify ![Publish on NPM](https://github.com/sergeyzwezdin/hexo-html-prettify/workflows/Publish%20on%20NPM/badge.svg) ![](https://img.shields.io/npm/v/hexo-html-prettify)
+# hexo-html-prettify
 
-`hexo-html-prettify` is a plugin for Hexo static site generator that tidies up output HTML markup.
-
-* **Tidies up** the output HTML markup on the fly.
-* Uses [`js-beautify`](https://beautifier.io) underneath. It's possible to use all power of this library to beautify HTML markup.
-* **Easy to use**. Just install it and it will start working.
-* **Customizable**. You will be able to change every setting of `js-beauty` minifier.
-
-## How it works
-
-Once Hexo build HTML page, the plugin runs `js-beautify` to cleanup output HTML. Easy! 🤓
+Maintained fork of [sergeyzwezdin/hexo-html-prettify](https://github.com/sergeyzwezdin/hexo-html-prettify). Formats rendered HTML with [js-beautify](https://github.com/beautifier/js-beautify).
 
 ## Requirements
-- Hexo: 4.x
-- Node 12+
 
-## Usage
+- Node.js 22.22.2+, 24.15.0+, or 26+. Node.js 24.21.0 LTS is selected by `.nvmrc`.
+- Hexo 6.3, 7.x or 8.x.
 
-1. Install the plugin using npm:
-```bash
-$ npm install hexo-html-prettify --save-dev
+Version 2 upgrades to js-beautify 2 and Picomatch 4, drops the old Node.js and Hexo 4/5 support, and fixes partial option overrides. Output can differ from version 1 as the formatter has changed.
+
+## Install this fork
+
+From a blog checkout next to this repository:
+
+```sh
+npm install --save-dev ../hexo-html-prettify
 ```
-2. After installation the plugin will start working with default settings, but if you need you can add `html_prettify` parameter to Hexo configuration file (see configuration description below).
-3. Build your website and enjoy! 🔥
+
+Hexo loads the plugin automatically. This local installation uses this fork without requiring an npm release.
 
 ## Configuration
 
-To configure the plugin add `html_prettify` key to the Hexo config file. For example:
+Set `html_prettify` in the blog's `_config.yml`:
 
 ```yaml
 html_prettify:
-    enable: true
-    exclude:
-        - "*/**/test"
-    options:
-        indent_size: 2
-        indent_char: " "
-        max_preserve_newlines: "-1"
-        preserve_newlines: false
-        keep_array_indentation: true
-        break_chained_methods: false
-        indent_scripts: normal
-        brace_style: expand
-        space_before_conditional: true
-        unescape_strings: false
-        jslint_happy: true
-        end_with_newline: true
-        wrap_line_length: "0"
-        indent_inner_html: false
-        comma_first: false
-        e4x: false
-        indent_empty_lines: false
+  enable: true
+  priority: 10
+  exclude:
+    - "**/drafts/**"
+  options:
+    indent_size: 2
+    indent_char: " "
+    preserve_newlines: false
+    end_with_newline: true
+    wrap_line_length: 0
 ```
 
-| Key | Required | Default value | Description |
-| --- | --- | --- | --- |
-| `enable` | `false` | `true` | Enable/disable output HTML prettifying. |
-| `exclude` | `false` | empty | Array of paths that should be excluded from processing. |
-| `options` | `false` | | Options object that will be passed to `js-beautify` during processing. You can generate your settings using [this online tool](https://beautifier.io/). |
+| Key | Default | Behavior |
+| --- | --- | --- |
+| `enable` | `true` | Enable the filter. `html_prettify: false` also disables it. |
+| `priority` | `10` | Hexo filter priority; lower numbers run first. |
+| `exclude` | `[]` | Picomatch glob patterns matched against the path supplied by Hexo. Windows separators are normalized to `/`. |
+| `options` | Plugin defaults | Passed to js-beautify. Partial overrides retain the remaining plugin defaults. |
+
+For generated theme pages, Hexo supplies an output path such as `drafts/index.html`. Common glob patterns such as `*`, `**` and brace alternatives are supported. Check advanced patterns when migrating from Micromatch.
+
+Default formatting uses four spaces, no preserved blank lines, an expanded brace style, no line-length limit and a final newline. Code inside `<pre>` and `<textarea>` retains its whitespace. Missing render metadata is supported.
+
+All formatter settings are documented in [js-beautify's README](https://github.com/beautifier/js-beautify#options).
+
+## Development
+
+```sh
+nvm install
+nvm use
+npm ci
+npm test
+```
+
+Tests cover configuration, exclusions, missing metadata, code whitespace and real Hexo/EJS generation. CI tests Node.js 22 and 24 with Hexo 6.3.0, 7.3.0 and 8.1.2.
+
+## Releases
+
+Branch pushes and pull requests run tests. Publishing runs only for a pushed `v*` tag after the test matrix passes, and the tag must match `package.json` (for example, `v2.0.0`). The repository's `NPM_AUTH_TOKEN` secret must have permission to publish the package.
+
+## License
+
+MIT. Original implementation by Sergey Zwezdin; see [LICENSE](LICENSE).
